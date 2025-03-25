@@ -11,83 +11,92 @@ To perform regular differncing,seasonal adjustment and log transformatio on inte
 5. Display the overall results.
 ### PROGRAM:
 ```c
-import pandas as pd
+ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-import holoviews as hv
-hv.extension('bokeh')
 ```
 ```c
-data=pd.read_csv('IOT-temp.csv')
+data = pd.read_csv('/content/IOT-temp.xls')
 ```
 ```c
-hv.Distribution(data['temp']).opts(
-    title="Regular Distribution",
-    color="blue",
-    xlabel="Temperature",
-    ylabel="Density",
-    width=700,
-    height=300,
-    tools=['hover'],
-    show_grid=True
-)
+print(data.head())
 ```
 ```c
-season_cnt = np.round(
-    data['temp'].value_counts(normalize=True) * 100
-)
+plt.figure(figsize=(10, 5))
+# Assuming 'noted_date' is the actual column name in your data
+plt.plot(data['noted_date'], data['temp'], label='Original Data')
+plt.xlabel('noted_date')
+plt.ylabel('temp')
+plt.title('Temperature Data - Original')
+plt.legend()
+plt.show()
+```
+```c
+data['Diff'] = data['temp'].diff()
+data.dropna(inplace=True)
+plt.figure(figsize=(10, 5))
+plt.plot(data['noted_date'], data['Diff'], label='Differenced Data')
+plt.xlabel('noted_date')
+plt.ylabel('temp Difference')
+plt.title('Temperature Data - Regular Differencing')
+plt.legend()
+plt.show()
+```
+```c
+!pip install statsmodels
+import statsmodels.api as sm
+from statsmodels.tsa.seasonal import seasonal_decompose # Import seasonal_decompose
 
+period = 12  # Adjust based on data frequency (e.g., monthly data -> 12)
+decomposition = seasonal_decompose(data['temp'], period=period, model='additive', extrapolate_trend='freq')
+data['Seasonally_Adjusted'] = data['temp'] - decomposition.seasonal
 
-hv.Bars(season_cnt).opts(
-    title="Season Count",
-    color="purple",
-    xlabel="Season",
-    ylabel="Percentage",
-    yformatter='%d%%',
-    width=700,
-    height=300,
-    tools=['hover'],
-    show_grid=True
-)
+plt.figure(figsize=(10, 5))
+plt.plot(data['noted_date'], data['Seasonally_Adjusted'], label='Seasonally Adjusted Data')
+plt.xlabel('noted_date')
+plt.ylabel('Seasonally Adjusted Temp')
+plt.title('Temperature Data - Seasonal Adjustment')
+plt.legend()
+plt.show()
+
 ```
 ```c
-
-data['log_temp'] = np.log(data['temp'].replace(0, np.nan))  
-print(data[['temp', 'log_temp']].head())
-plt.figure(figsize=(10, 6))
-sns.histplot(data['log_temp'], kde=True)
-plt.title('Log-Transformed Temperature Distribution')
-plt.xlabel('Log Temperature')
-plt.ylabel('Frequency')
+data['Log'] = np.log(data['temp'])
+data.dropna(inplace=True)
+plt.figure(figsize=(10, 5))
+plt.plot(data['noted_date'], data['Log'], label='Log Transformed Data')
+plt.xlabel('noted_date')
+plt.ylabel('Log(temp)')
+plt.title('Temperature Data - Log Transformation')
+plt.legend()
 plt.show()
 ```
 
-
 ### OUTPUT:
+
+ORIGINAL DIFFERENCING:
+
+![download](https://github.com/user-attachments/assets/8b22b986-2819-46eb-b5bb-0ea46ae60ddd)
 
 
 REGULAR DIFFERENCING:
 
-![image](https://github.com/user-attachments/assets/f3346c45-d2b5-4c97-8b0e-baeb44f5c665)
+![download](https://github.com/user-attachments/assets/48412b37-4a89-4ae5-b2e6-1cfa1e2aff55)
+
 
 
 SEASONAL ADJUSTMENT:
 
-![image](https://github.com/user-attachments/assets/936c0071-3a4b-4900-b166-01c52464cd89)
+![download](https://github.com/user-attachments/assets/13e938d1-2de9-4c1d-892a-858585a0fc9f)
+
 
 
 LOG TRANSFORMATION:
 
-![image](https://github.com/user-attachments/assets/3f188ca5-583d-4e69-9396-dc6794cff0c3)
-
-
-![image](https://github.com/user-attachments/assets/a8d418f3-6cf4-4bf8-a322-dd7fed12e662)
+![download](https://github.com/user-attachments/assets/338128d3-c0cb-472f-aa9a-11cebe4ff10c)
 
 
 ### RESULT:
-we created code for nonstationary conversion to stationary conversion 
-
 
 Thus we have created the python code for the conversion of non stationary to stationary data on international airline passenger
 data.
